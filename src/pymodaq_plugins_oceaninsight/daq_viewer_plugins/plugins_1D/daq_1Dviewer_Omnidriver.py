@@ -32,6 +32,18 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
         {'title': 'Omnidriver path:', 'name': 'omnidriver_path', 'type': 'browsepath', 'value': omnidriver_default_path, 'filetype': False},
         {'title': 'N spectrometers:', 'name': 'Nspectrometers', 'type': 'int', 'value': 0, 'default': 0, 'min': 0},
         {'title': 'Spectrometers:', 'name': 'spectrometers', 'type': 'group', 'children': []},
+        {
+            "title": "Take snapshot",
+            "name": "take_snap",
+            "type": "bool_push",
+            "value": False,
+        },
+        {
+            "title": "Clear snapshot",
+            "name": "clear_snap",
+            "type": "bool_push",
+            "value": False,
+        },
         ]
 
     hardware_averaging = True
@@ -43,6 +55,7 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
         self.controller = None
         self.spectro_names = []  # contains the spectro name as returned from the wrapper
         self.spectro_id = []  # contains the spectro id as set by the ini_detector method and equal to the Parameter name
+        self.snapshot = None
 
     def commit_settings(self, param):
         """
@@ -63,6 +76,21 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
                 self.omnidriver = OmniDriver
             except Exception as e:
                 self.emit_status(ThreadCommand('Update_Status', [getLineInfo() + str(e), 'log']))
+
+        elif param.name() == "take_snap":
+            try:
+                self.snapshot = self.parent.datas[0]['data'][0]   # Get currently displayed data
+                self.settings.child("take_snap").setValue(False)
+
+            except Exception as e:
+                self.emit_status(
+                    ThreadCommand("Update_Status", [getLineInfo() + str(e), "log"])
+                )
+                self.status.info = getLineInfo() + str(e)
+
+        elif param.name() == "clear_snap":
+            self.snapshot = None
+            self.settings.child("clear_snap").setValue(False)
 
     def ini_detector(self, controller=None):
         """
@@ -164,6 +192,8 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
                     datas.append(DataFromPlugins(name=self.spectro_names[ind_spectro], data=[data], dim='Data1D', x_axis=self.x_axis[0]))
                     QtWidgets.QApplication.processEvents()
 
+            if self.snapshot is not None:
+                datas.append(self.snapshot)
             self.data_grabed_signal.emit(datas)
 
         except Exception as e:
