@@ -46,7 +46,7 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
         },
         ]
 
-    hardware_averaging = True
+    hardware_averaging = False
 
     def __init__(self, parent=None,
                  params_state=None):  # init_params is a list of tuple where each tuple contains info on a 1D channel (Ntps,amplitude, width, position and noise)
@@ -187,13 +187,14 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
                 if self.settings.child('spectrometers', 'spectro{:d}'.format(ind_spectro), 'grab').value():
                     self.controller.setScansToAverage(ind_spectro, Naverage)
                     data_chelou = self.controller.getSpectrum(ind_spectro)
-                    data = np.array([data_chelou[ind] for ind in range(len(data_chelou))])
+                    data = [np.array([data_chelou[ind] for ind in range(len(data_chelou))])]
 
-                    datas.append(DataFromPlugins(name=self.spectro_names[ind_spectro], data=[data], dim='Data1D', x_axis=self.x_axis[0]))
+                    if self.snapshot is not None:
+                        data.append(self.snapshot)
+
+                    datas.append(DataFromPlugins(name=self.spectro_names[ind_spectro], data=data, dim='Data1D', x_axis=self.x_axis[0]))
                     QtWidgets.QApplication.processEvents()
 
-            if self.snapshot is not None:
-                datas.append(self.snapshot)
             self.data_grabed_signal.emit(datas)
 
         except Exception as e:
