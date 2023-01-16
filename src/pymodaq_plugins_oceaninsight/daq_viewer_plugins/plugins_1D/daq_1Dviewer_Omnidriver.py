@@ -1,12 +1,12 @@
 from qtpy import QtWidgets
-from pymodaq.control_modules.viewer_utility_classes import DAQ_Viewer_base
+from pymodaq.daq_viewer.utility_classes import DAQ_Viewer_base
 import numpy as np
 from collections import OrderedDict
 from pymodaq.daq_utils.daq_utils import ThreadCommand, getLineInfo, DataFromPlugins, Axis
 import sys
 import clr
 from easydict import EasyDict as edict
-from pymodaq.control_modules.viewer_utility_classes import comon_parameters
+from pymodaq.daq_viewer.utility_classes import comon_parameters
 
 
 class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
@@ -61,8 +61,8 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
                 clr.AddReference("NETOmniDriver-NET40")
                 import OmniDriver
                 self.omnidriver = OmniDriver
-            except:
-                pass
+            except Exception as e:
+                self.emit_status(ThreadCommand('Update_Status', [getLineInfo() + str(e), 'log']))
 
     def ini_detector(self, controller=None):
         """
@@ -161,7 +161,7 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
                     data_chelou = self.controller.getSpectrum(ind_spectro)
                     data = np.array([data_chelou[ind] for ind in range(len(data_chelou))])
 
-                    datas.append(DataFromPlugins(name=self.spectro_names[ind_spectro], data=[data], dim='Data1D'))
+                    datas.append(DataFromPlugins(name=self.spectro_names[ind_spectro], data=[data], dim='Data1D', x_axis=self.x_axis[0]))
                     QtWidgets.QApplication.processEvents()
 
             self.data_grabed_signal.emit(datas)
