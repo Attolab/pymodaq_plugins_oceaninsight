@@ -29,7 +29,7 @@ class DAQ_1DViewer_Omnidriver(DAQ_Viewer_base):
     omnidriver_default_path = 'C:\\Program Files\\Ocean Optics\\OmniDriver\\OOI_HOME'
 
     params = comon_parameters + [
-        {'title': 'Omnidriver path:', 'name': 'omnidriver_path', 'type': 'browsepath', 'value': omnidriver_default_path},
+        {'title': 'Omnidriver path:', 'name': 'omnidriver_path', 'type': 'browsepath', 'value': omnidriver_default_path, 'filetype': False},
         {'title': 'N spectrometers:', 'name': 'Nspectrometers', 'type': 'int', 'value': 0, 'default': 0, 'min': 0},
         {'title': 'Spectrometers:', 'name': 'spectrometers', 'type': 'group', 'children': []},
         ]
